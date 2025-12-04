@@ -7,10 +7,10 @@ export type User = {
 const OWNER_EMAIL = process.env.OWNER_EMAIL;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
-// TEMPORARY AUTH SIMULATION
-// This will be replaced with Supabase Auth later
+// TEMP AUTH SIMULATION (will be replaced by real Supabase Auth later)
 export async function getCurrentUser(): Promise<User | null> {
-  const email: string = OWNER_EMAIL ?? "";  // ALWAYS a string
+  // Always return a string, never undefined
+  const email: string = OWNER_EMAIL ?? "";
 
   let role: User["role"] = "user";
 
@@ -22,7 +22,7 @@ export async function getCurrentUser(): Promise<User | null> {
 
   return {
     id: "local-user",
-    email,   // email is guaranteed a string here
-    role
+    email: email,   // ← absolutely guaranteed string
+    role: role
   };
 }
