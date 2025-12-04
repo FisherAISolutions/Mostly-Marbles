@@ -1,5 +1,7 @@
 "use client";
 
-export default function SupabaseProvider({ children }) {
+import type { ReactNode } from "react";
+
+export default function SupabaseProvider({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
