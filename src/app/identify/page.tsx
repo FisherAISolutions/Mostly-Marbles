@@ -2,124 +2,109 @@
 
 import { useState } from "react";
 
-type Result = {
-  handmade?: string;
-  originGuess?: string;
-  ageGuess?: string;
-  rarityGuess?: string;
-  notes?: string;
-};
-
 export default function IdentifyPage() {
   const [file, setFile] = useState<File | null>(null);
-  const [result, setResult] = useState<Result | null>(null);
+  const [email, setEmail] = useState("");
+  const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
-  const submit = async () => {
-    if (!file) return;
+  function onFileChange(e: any) {
+    setFile(e.target.files?.[0] ?? null);
+  }
+
+  async function identify() {
+    if (!file) {
+      alert("Please select an image first.");
+      return;
+    }
+
     setLoading(true);
     setResult(null);
-    const form = new FormData();
-    form.append("image", file);
 
-    try {
-      const res = await fetch("/api/identify", {
-        method: "POST",
-        body: form
-      });
-      const data = await res.json();
-      setResult(data.result ?? null);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("email", email || "unknown");
+
+    const res = await fetch("/api/identify", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    setResult(data);
+    setLoading(false);
+  }
 
   return (
-    <div style={{ display: "grid", gap: 24, maxWidth: 640 }}>
-      <header>
-        <h1>AI Marble Identifier</h1>
-        <p style={{ opacity: 0.8, fontSize: 14 }}>
-          Upload a clear photo of a single marble. The AI will analyze texture, color, and pattern to suggest whether it
-          is handmade or machine-made, its likely origin, approximate age, and rarity band.
-        </p>
-      </header>
+    <div style={{ display: "grid", gap: 20 }}>
+      <h1>AI Marble Identifier</h1>
+      <p>Upload a marble image and let the AI identify type, origin, age, and more.</p>
 
-      <div
+      <div style={{ display: "grid", gap: 10 }}>
+        <label>Your Email (optional)</label>
+        <input
+          type="email"
+          value={email}
+          placeholder="example@email.com"
+          onChange={(e) => setEmail(e.target.value)}
+          style={{
+            padding: "10px",
+            borderRadius: 8,
+            border: "1px solid rgba(255,255,255,0.2)",
+            background: "rgba(255,255,255,0.05)",
+          }}
+        />
+      </div>
+
+      <input type="file" accept="image/*" onChange={onFileChange} />
+
+      {file && (
+        <img
+          src={URL.createObjectURL(file)}
+          style={{
+            width: 200,
+            height: 200,
+            objectFit: "cover",
+            borderRadius: 12,
+            marginTop: 10,
+          }}
+        />
+      )}
+
+      <button
+        onClick={identify}
+        disabled={loading}
         style={{
-          background: "rgba(10,12,20,0.95)",
-          borderRadius: 16,
-          padding: 16,
-          border: "1px solid rgba(120,120,150,0.4)"
+          marginTop: 20,
+          padding: "12px 20px",
+          borderRadius: 8,
+          background: loading
+            ? "gray"
+            : "linear-gradient(135deg, #8ab4ff, #7bdcb5)",
+          border: "none",
+          fontWeight: 600,
+          color: "#000",
         }}
       >
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          style={{ marginBottom: 12 }}
-        />
-        <button
-          onClick={submit}
-          disabled={!file || loading}
-          style={{
-            borderRadius: 999,
-            border: "none",
-            padding: "8px 18px",
-            background: "linear-gradient(135deg, #8ab4ff, #7bdcb5)",
-            color: "#050509",
-            fontWeight: 600,
-            fontSize: 13,
-            opacity: !file || loading ? 0.6 : 1
-          }}
-        >
-          {loading ? "Analyzing…" : "Identify Marble"}
-        </button>
-      </div>
+        {loading ? "Analyzing..." : "Identify Marble"}
+      </button>
+
+      {loading && (
+        <p style={{ opacity: 0.7 }}>The AI is analyzing your image...</p>
+      )}
 
       {result && (
         <div
           style={{
-            background: "rgba(10,12,20,0.95)",
-            borderRadius: 16,
-            padding: 16,
-            border: "1px solid rgba(120,120,150,0.4)",
-            fontSize: 14
+            marginTop: 20,
+            padding: 20,
+            background: "rgba(255,255,255,0.05)",
+            borderRadius: 12,
+            whiteSpace: "pre-wrap",
           }}
         >
-          <h2 style={{ fontSize: 18, marginTop: 0 }}>Preliminary Result</h2>
-          <ul style={{ paddingLeft: 18 }}>
-            {result.handmade && (
-              <li>
-                <strong>Construction:</strong> {result.handmade}
-              </li>
-            )}
-            {result.originGuess && (
-              <li>
-                <strong>Likely origin:</strong> {result.originGuess}
-              </li>
-            )}
-            {result.ageGuess && (
-              <li>
-                <strong>Approximate age:</strong> {result.ageGuess}
-              </li>
-            )}
-            {result.rarityGuess && (
-              <li>
-                <strong>Rarity band:</strong> {result.rarityGuess}
-              </li>
-            )}
-            {result.notes && (
-              <li>
-                <strong>Notes:</strong> {result.notes}
-              </li>
-            )}
-          </ul>
-          <p style={{ opacity: 0.7, marginTop: 8 }}>
-            This is an AI-assisted guess. Always cross-check with expert references, auction records, and physical
-            inspection.
-          </p>
+          <h2>Result:</h2>
+          <pre>{JSON.stringify(result, null, 2)}</pre>
         </div>
       )}
     </div>
