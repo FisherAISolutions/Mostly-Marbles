@@ -2,14 +2,13 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SupabaseProvider from "@/components/SupabaseProvider";
-import type { ReactNode } from "react";
 
 export const metadata = {
-  title: "Marble Market",
-  description: "Marble marketplace & AI identifier for collectors."
+  title: "Mostly Marbles",
+  description: "Marble marketplace & AI identifier."
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
