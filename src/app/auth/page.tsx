@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 
 export default function AuthPage() {
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserSupabaseClient();
   const router = useRouter();
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -13,7 +13,6 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Redirect if already logged in
   useEffect(() => {
     async function checkSession() {
       const {
@@ -25,7 +24,6 @@ export default function AuthPage() {
     checkSession();
   }, [supabase, router]);
 
-  // SIGN UP FUNCTION
   async function handleSignUp() {
     setLoading(true);
 
@@ -40,22 +38,18 @@ export default function AuthPage() {
       return;
     }
 
-    // Auto-create user role row
     if (data.user) {
-      const { error: roleError } = await supabase.from("user_roles").insert({
+      await supabase.from("user_roles").insert({
         user_id: data.user.id,
         email: data.user.email,
         role: "user",
       });
-
-      if (roleError) console.error("Role insert failed:", roleError);
     }
 
     setLoading(false);
-    alert("Account created! Check your email to confirm your account.");
+    alert("Account created! Check your email to verify.");
   }
 
-  // SIGN IN FUNCTION
   async function handleSignIn() {
     setLoading(true);
 
@@ -90,12 +84,10 @@ export default function AuthPage() {
         {mode === "signin" ? "Sign In" : "Create Account"}
       </h1>
 
-      {/* EMAIL FIELD */}
-      <label style={{ display: "block", marginBottom: 6 }}>Email</label>
+      <label>Email</label>
       <input
         type="email"
         value={email}
-        placeholder="you@example.com"
         onChange={(e) => setEmail(e.target.value)}
         style={{
           width: "100%",
@@ -108,12 +100,10 @@ export default function AuthPage() {
         }}
       />
 
-      {/* PASSWORD FIELD */}
-      <label style={{ display: "block", marginBottom: 6 }}>Password</label>
+      <label>Password</label>
       <input
         type="password"
         value={password}
-        placeholder="••••••••"
         onChange={(e) => setPassword(e.target.value)}
         style={{
           width: "100%",
@@ -126,7 +116,6 @@ export default function AuthPage() {
         }}
       />
 
-      {/* SUBMIT BUTTON */}
       <button
         disabled={loading}
         onClick={mode === "signin" ? handleSignIn : handleSignUp}
@@ -149,7 +138,6 @@ export default function AuthPage() {
           : "Sign Up"}
       </button>
 
-      {/* SWITCH MODE */}
       <p style={{ textAlign: "center", marginTop: 10 }}>
         {mode === "signin" ? (
           <>
