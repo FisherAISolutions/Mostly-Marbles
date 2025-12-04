@@ -15,6 +15,7 @@ export default function TrainingSourcesPage() {
 
   async function addSource(e: any) {
     e.preventDefault();
+
     await fetch("/api/admin/sources", {
       method: "POST",
       body: JSON.stringify({ url, notes }),
@@ -24,6 +25,17 @@ export default function TrainingSourcesPage() {
     setUrl("");
     setNotes("");
     loadSources();
+  }
+
+  async function scrape(targetUrl: string) {
+    const res = await fetch("/api/admin/scrape", {
+      method: "POST",
+      body: JSON.stringify({ url: targetUrl }),
+      headers: { "Content-Type": "application/json" }
+    });
+
+    const data = await res.json();
+    alert(`Scrape finished!\nImages Found: ${data.imagesFound}\nText Length: ${data.textLength}`);
   }
 
   useEffect(() => {
@@ -37,7 +49,7 @@ export default function TrainingSourcesPage() {
         Add URLs containing marble information so the AI can learn from them.
       </p>
 
-      {/* Add Source */}
+      {/* Add Source Form */}
       <form
         onSubmit={addSource}
         style={{
@@ -99,6 +111,20 @@ export default function TrainingSourcesPage() {
           <div style={{ fontSize: 12, opacity: 0.5 }}>
             Added: {new Date(src.created_at).toLocaleString()}
           </div>
+
+          <button
+            onClick={() => scrape(src.url)}
+            style={{
+              marginTop: 10,
+              padding: "6px 14px",
+              background: "linear-gradient(90deg,#8ab4ff,#7bdcb5)",
+              border: "none",
+              borderRadius: 6,
+              fontWeight: 600
+            }}
+          >
+            Scrape Source
+          </button>
         </div>
       ))}
     </div>

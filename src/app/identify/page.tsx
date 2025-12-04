@@ -36,37 +36,43 @@ export default function IdentifyPage() {
   }
 
   return (
-    <div style={{ display: "grid", gap: 20 }}>
-      <h1>AI Marble Identifier</h1>
-      <p>Upload a marble image and let the AI identify type, origin, age, and more.</p>
+    <div style={{ padding: 20, maxWidth: 600, margin: "0 auto" }}>
+      <h1 style={{ fontSize: 26, fontWeight: 700, marginBottom: 10 }}>
+        AI Marble Identifier
+      </h1>
 
-      <div style={{ display: "grid", gap: 10 }}>
-        <label>Your Email (optional)</label>
-        <input
-          type="email"
-          value={email}
-          placeholder="example@email.com"
-          onChange={(e) => setEmail(e.target.value)}
-          style={{
-            padding: "10px",
-            borderRadius: 8,
-            border: "1px solid rgba(255,255,255,0.2)",
-            background: "rgba(255,255,255,0.05)",
-          }}
-        />
-      </div>
+      <p style={{ opacity: 0.7, marginBottom: 20 }}>
+        Upload a marble image and let the AI identify type, origin, age, and more.
+      </p>
 
-      <input type="file" accept="image/*" onChange={onFileChange} />
+      <input
+        type="email"
+        placeholder="Your email (optional)"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        style={{
+          width: "100%",
+          padding: 12,
+          marginBottom: 12,
+          borderRadius: 8,
+          border: "1px solid rgba(255,255,255,0.2)"
+        }}
+      />
+
+      <input
+        type="file"
+        accept="image/*"
+        onChange={onFileChange}
+        style={{ width: "100%", marginBottom: 12 }}
+      />
 
       {file && (
         <img
           src={URL.createObjectURL(file)}
           style={{
-            width: 200,
-            height: 200,
-            objectFit: "cover",
+            width: "100%",
             borderRadius: 12,
-            marginTop: 10,
+            marginTop: 10
           }}
         />
       )}
@@ -75,23 +81,17 @@ export default function IdentifyPage() {
         onClick={identify}
         disabled={loading}
         style={{
+          width: "100%",
           marginTop: 20,
-          padding: "12px 20px",
+          padding: 14,
           borderRadius: 8,
-          background: loading
-            ? "gray"
-            : "linear-gradient(135deg, #8ab4ff, #7bdcb5)",
+          background: loading ? "gray" : "linear-gradient(135deg,#8ab4ff,#7bdcb5)",
           border: "none",
-          fontWeight: 600,
-          color: "#000",
+          fontWeight: 600
         }}
       >
         {loading ? "Analyzing..." : "Identify Marble"}
       </button>
-
-      {loading && (
-        <p style={{ opacity: 0.7 }}>The AI is analyzing your image...</p>
-      )}
 
       {result && (
         <div
@@ -100,11 +100,14 @@ export default function IdentifyPage() {
             padding: 20,
             background: "rgba(255,255,255,0.05)",
             borderRadius: 12,
-            whiteSpace: "pre-wrap",
+            whiteSpace: "pre-line",
+            overflowWrap: "break-word"
           }}
         >
           <h2>Result:</h2>
-          <pre>{JSON.stringify(result, null, 2)}</pre>
+          <pre style={{ whiteSpace: "pre-wrap" }}>
+            {JSON.stringify(result, null, 2)}
+          </pre>
         </div>
       )}
     </div>

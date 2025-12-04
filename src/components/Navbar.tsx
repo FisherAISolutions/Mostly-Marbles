@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 const links = [
   { href: "/", label: "Home" },
@@ -12,17 +13,15 @@ const links = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
   return (
     <nav
       style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 40,
         borderBottom: "1px solid rgba(120,120,150,0.35)",
         padding: "10px 0",
         backdropFilter: "blur(18px)",
-        background:
-          "linear-gradient(to right, rgba(2,4,20,0.96), rgba(10,14,35,0.96))"
+        background: "linear-gradient(to right, rgba(2,4,20,.95), rgba(10,14,35,.95))"
       }}
     >
       <div
@@ -32,62 +31,102 @@ export default function Navbar() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: 24,
           padding: "0 16px"
         }}
       >
-        <Link href="/auth">Sign In</Link>
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        {/* Mobile Toggle */}
+        <button
+          onClick={() => setOpen(!open)}
+          style={{
+            display: "block",
+            background: "none",
+            border: "none",
+            fontSize: 24,
+            color: "white"
+          }}
+          className="mobile-menu-button"
+        >
+          ☰
+        </button>
+
+        {/* Logo */}
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div
             style={{
-              width: 32,
-              height: 32,
+              width: 30,
+              height: 30,
               borderRadius: "999px",
-              background:
-                "radial-gradient(circle at 30% 30%, #ffffff, #8ab4ff 40%, #121827 75%)",
-              boxShadow: "0 0 22px rgba(138,180,255,0.65)"
+              background: "radial-gradient(circle, #fff, #8ab4ff 45%, #121827 80%)"
             }}
-          />
-          <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.1 }}>
-            <span style={{ fontWeight: 700, fontSize: 18 }}>Mostly Marbles</span>
-            <span style={{ fontSize: 11, opacity: 0.7 }}>AI • Marketplace • Community</span>
-          </div>
+          ></div>
+          <span style={{ fontWeight: 700, fontSize: 18 }}>Mostly Marbles</span>
         </Link>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 18, fontSize: 14 }}>
-          {links.map((l) => {
-            const active = pathname === l.href;
-            return (
-              <Link
-                key={l.href}
-                href={l.href}
-                style={{
-                  position: "relative",
-                  paddingBottom: 4,
-                  fontWeight: active ? 600 : 400,
-                  opacity: active ? 1 : 0.75
-                }}
-              >
-                {l.label}
-                {active && (
-                  <span
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      bottom: 0,
-                      height: 2,
-                      width: "100%",
-                      borderRadius: 999,
-                      background:
-                        "linear-gradient(90deg, #8ab4ff, #7bdcb5)"
-                    }}
-                  />
-                )}
-              </Link>
-            );
-          })}
-        </div>
       </div>
+
+      {/* MOBILE NAV */}
+      {open && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            padding: 16,
+            background: "rgba(0,0,0,0.6)"
+          }}
+          className="mobile-nav"
+        >
+          {links.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              onClick={() => setOpen(false)}
+              style={{
+                padding: "10px 0",
+                borderBottom: "1px solid rgba(255,255,255,0.15)",
+                color: pathname === l.href ? "#8ab4ff" : "white",
+                fontWeight: pathname === l.href ? 700 : 400
+              }}
+            >
+              {l.label}
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* DESKTOP LINKS */}
+      <div
+        className="desktop-links"
+        style={{
+          display: "none",
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "10px 16px",
+          justifyContent: "flex-end",
+          gap: 18
+        }}
+      >
+        {links.map((l) => (
+          <Link
+            key={l.href}
+            href={l.href}
+            style={{
+              position: "relative",
+              padding: "10px",
+              fontWeight: pathname === l.href ? 700 : 400,
+              opacity: pathname === l.href ? 1 : 0.7
+            }}
+          >
+            {l.label}
+          </Link>
+        ))}
+      </div>
+
+      <style>{`
+        @media (min-width: 768px) {
+          .mobile-menu-button { display: none; }
+          .mobile-nav { display: none !important; }
+          .desktop-links { display: flex !important; }
+        }
+      `}</style>
     </nav>
   );
 }
