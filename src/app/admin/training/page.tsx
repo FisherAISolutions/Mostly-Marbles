@@ -3,128 +3,112 @@
 import { useState } from "react";
 
 export default function TrainingPage() {
-  const [form, setForm] = useState({
-    title: "",
-    type: "",
-    origin: "",
-    age: "",
-    rarity: "",
-    notes: "",
-    reference_text: "",
-    reference_url: "",
-    image_file: null as File | null,
-  });
+  const [file, setFile] = useState<File | null>(null);
+  const [description, setDescription] = useState("");
+  const [notes, setNotes] = useState("");
+  const [url, setUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
-  const [status, setStatus] = useState("");
+  const uploadTrainingSample = async () => {
+    if (!file && !description && !url) {
+      alert("Please provide an image or text or URL.");
+      return;
+    }
 
-  function update(key: string, value: any) {
-    setForm({ ...form, [key]: value });
-  }
+    setLoading(true);
 
-  async function uploadImage() {
-    if (!form.image_file) return null;
+    const formData = new FormData();
+    if (file) formData.append("file", file);
+    formData.append("description", description);
+    formData.append("notes", notes);
+    formData.append("url", url);
 
-    const ext = form.image_file.name.split(".").pop();
-    const filename = `training-${Date.now()}.${ext}`;
-
-    const res = await fetch(`/api/admin/upload`, {
+    const res = await fetch("/api/admin/training", {
       method: "POST",
-      body: form.image_file,
-      headers: { "x-file-name": filename },
+      body: formData
     });
 
     const data = await res.json();
-    return data.url;
-  }
-
-  async function submitTraining() {
-    setStatus("Uploading image & saving...");
-
-    let image_url = null;
-
-    if (form.image_file) {
-      image_url = await uploadImage();
-    }
-
-    const payload = {
-      ...form,
-      image_url,
-    };
-
-    const res = await fetch("/api/admin/train", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-
-    if (res.ok) {
-      setStatus("Training sample saved!");
-      setForm({
-        title: "",
-        type: "",
-        origin: "",
-        age: "",
-        rarity: "",
-        notes: "",
-        reference_text: "",
-        reference_url: "",
-        image_file: null,
-      });
-    } else {
-      setStatus("Error saving training sample.");
-    }
-  }
+    setMessage(data.message || "Uploaded successfully!");
+    setLoading(false);
+  };
 
   return (
-    <div style={{ display: "grid", gap: 20 }}>
+    <div style={{ padding: 30 }}>
       <h1>AI Training Center</h1>
 
-      <div style={{ display: "grid", gap: 12 }}>
+      <p>Upload marble references, images, detailed descriptions, or URLs to teach the AI.</p>
+
+      <div style={{ marginTop: 20, display: "grid", gap: 20, maxWidth: 500 }}>
+
         <div>
-          <label>Upload Image</label>
+          <label>Training Image</label>
           <input
             type="file"
             accept="image/*"
-            onChange={(e) =>
-              update("image_file", e.target.files ? e.target.files[0] : null)
-            }
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           />
         </div>
 
-        {Object.keys(form)
-          .filter((key) => key !== "image_file")
-          .map((key) => (
-            <div key={key} style={{ display: "grid", gap: 4 }}>
-              <label>{key.toUpperCase()}</label>
-              <textarea
-                value={(form as any)[key]}
-                onChange={(e) => update(key, e.target.value)}
-                style={{
-                  minHeight: key === "reference_text" ? 150 : 80,
-                  padding: 10,
-                  borderRadius: 6,
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                }}
-              />
-            </div>
-          ))}
+        <div>
+          <label>Full Description / Metadata</label>
+          <textarea
+            placeholder="Example: Handmade German onionskin, 1890, mica inclusions, strong color bands, pontil mark..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            style={{ width: "100%", height: 120 }}
+          />
+        </div>
+
+        <div>
+          <label>Training Notes</label>
+          <textarea
+            placeholder="Extra training comments…"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            style={{ width: "100%", height: 80 }}
+          />
+        </div>
+
+        <div>
+          <label>Reference URL (optional)</label>
+          <input
+            type="text"
+            placeholder="https://marblecollecting.com/..."
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            style={{ width: "100%" }}
+          />
+        </div>
 
         <button
-          onClick={submitTraining}
+          onClick={uploadTrainingSample}
+          disabled={loading}
           style={{
-            padding: "12px 20px",
+            padding: 12,
             borderRadius: 8,
-            background: "linear-gradient(135deg, #8ab4ff, #7bdcb5)",
+            background: "linear-gradient(90deg,#8ab4ff,#7bdcb5)",
             border: "none",
-            fontWeight: 600,
             color: "#000",
-            marginTop: 12,
+            fontWeight: "bold"
           }}
         >
-          Save Training Sample
+          {loading ? "Uploading..." : "Add Training Sample"}
         </button>
 
-        <p>{status}</p>
+        {message && (
+          <div
+            style={{
+              marginTop: 10,
+              padding: 10,
+              background: "rgba(255,255,255,0.1)",
+              borderRadius: 8
+            }}
+          >
+            {message}
+          </div>
+        )}
       </div>
     </div>
   );
