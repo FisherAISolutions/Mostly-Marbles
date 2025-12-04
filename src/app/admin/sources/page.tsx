@@ -7,12 +7,14 @@ export default function TrainingSourcesPage() {
   const [url, setUrl] = useState("");
   const [notes, setNotes] = useState("");
 
+  // Load existing training source URLs
   async function loadSources() {
     const res = await fetch("/api/admin/sources");
     const data = await res.json();
     setSources(data);
   }
 
+  // Add new source URL
   async function addSource(e: any) {
     e.preventDefault();
 
@@ -27,15 +29,18 @@ export default function TrainingSourcesPage() {
     loadSources();
   }
 
-  async function scrape(targetUrl: string) {
+  // SCRAPE BUTTON HANDLER
+  async function scrape(sourceUrl: string) {
     const res = await fetch("/api/admin/scrape", {
       method: "POST",
-      body: JSON.stringify({ url: targetUrl }),
+      body: JSON.stringify({ url: sourceUrl }),
       headers: { "Content-Type": "application/json" }
     });
 
     const data = await res.json();
-    alert(`Scrape finished!\nImages Found: ${data.imagesFound}\nText Length: ${data.textLength}`);
+    alert(
+      `Scrape complete!\nImages Found: ${data.imagesFound}\nText Characters: ${data.textLength}`
+    );
   }
 
   useEffect(() => {
@@ -49,7 +54,7 @@ export default function TrainingSourcesPage() {
         Add URLs containing marble information so the AI can learn from them.
       </p>
 
-      {/* Add Source Form */}
+      {/* ADD NEW SOURCE */}
       <form
         onSubmit={addSource}
         style={{
@@ -63,7 +68,12 @@ export default function TrainingSourcesPage() {
         <input
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          style={{ width: "100%", padding: 10, marginTop: 6, marginBottom: 12 }}
+          style={{
+            width: "100%",
+            padding: 10,
+            marginTop: 6,
+            marginBottom: 12
+          }}
         />
 
         <label>Notes:</label>
@@ -93,7 +103,7 @@ export default function TrainingSourcesPage() {
         </button>
       </form>
 
-      {/* Existing Sources */}
+      {/* LIST OF SOURCES */}
       <h2 style={{ fontSize: 22, marginBottom: 10 }}>Saved Sources</h2>
 
       {sources.map((src: any) => (
@@ -112,15 +122,17 @@ export default function TrainingSourcesPage() {
             Added: {new Date(src.created_at).toLocaleString()}
           </div>
 
+          {/* SCRAPE BUTTON */}
           <button
             onClick={() => scrape(src.url)}
             style={{
               marginTop: 10,
-              padding: "6px 14px",
+              padding: "8px 16px",
               background: "linear-gradient(90deg,#8ab4ff,#7bdcb5)",
               border: "none",
               borderRadius: 6,
-              fontWeight: 600
+              fontWeight: 600,
+              cursor: "pointer"
             }}
           >
             Scrape Source
