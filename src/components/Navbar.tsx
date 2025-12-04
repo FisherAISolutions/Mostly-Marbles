@@ -8,7 +8,8 @@ const links = [
   { href: "/", label: "Home" },
   { href: "/marketplace", label: "Marketplace" },
   { href: "/identify", label: "AI Identifier" },
-  { href: "/admin", label: "Admin" }
+  { href: "/admin/training", label: "Training" },
+  { href: "/admin", label: "Admin Dashboard" },
 ];
 
 export default function Navbar() {
@@ -18,113 +19,152 @@ export default function Navbar() {
   return (
     <nav
       style={{
-        borderBottom: "1px solid rgba(120,120,150,0.35)",
-        padding: "10px 0",
-        backdropFilter: "blur(18px)",
-        background: "linear-gradient(to right, rgba(2,4,20,.95), rgba(10,14,35,.95))"
+        width: "100%",
+        borderBottom: "1px solid rgba(255,255,255,0.15)",
+        background: "rgba(10,10,20,0.9)",
+        backdropFilter: "blur(20px)",
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
       }}
     >
+      {/* TOP BAR */}
       <div
         style={{
           maxWidth: 1200,
           margin: "0 auto",
+          padding: "10px 16px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 16px"
         }}
       >
-        {/* Mobile Toggle */}
-        <button
-          onClick={() => setOpen(!open)}
+        {/* LOGO */}
+        <Link
+          href="/"
           style={{
-            display: "block",
-            background: "none",
-            border: "none",
-            fontSize: 24,
-            color: "white"
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            color: "white",
+            fontWeight: 700,
+            fontSize: 20,
           }}
-          className="mobile-menu-button"
         >
-          ☰
-        </button>
-
-        {/* Logo */}
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div
             style={{
               width: 30,
               height: 30,
-              borderRadius: "999px",
-              background: "radial-gradient(circle, #fff, #8ab4ff 45%, #121827 80%)"
+              borderRadius: "50%",
+              background:
+                "radial-gradient(circle at 30% 30%, #ffffff, #8ab4ff 40%, #1c2333 80%)",
             }}
           ></div>
-          <span style={{ fontWeight: 700, fontSize: 18 }}>Mostly Marbles</span>
+          Mostly Marbles
         </Link>
-      </div>
 
-      {/* MOBILE NAV */}
-      {open && (
-        <div
+        {/* MOBILE MENU BUTTON */}
+        <button
+          onClick={() => setOpen(!open)}
           style={{
-            display: "flex",
-            flexDirection: "column",
-            padding: 16,
-            background: "rgba(0,0,0,0.6)"
+            background: "none",
+            border: "none",
+            fontSize: 28,
+            color: "white",
+            cursor: "pointer",
+            display: "block",
           }}
-          className="mobile-nav"
+          className="mobile-toggle"
+        >
+          ☰
+        </button>
+
+        {/* DESKTOP MENU */}
+        <div
+          className="desktop-menu"
+          style={{
+            display: "none",
+            gap: 20,
+            alignItems: "center",
+          }}
         >
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              onClick={() => setOpen(false)}
               style={{
-                padding: "10px 0",
-                borderBottom: "1px solid rgba(255,255,255,0.15)",
-                color: pathname === l.href ? "#8ab4ff" : "white",
-                fontWeight: pathname === l.href ? 700 : 400
+                color: pathname === l.href ? "#8ab4ff" : "#fff",
+                fontWeight: pathname === l.href ? 700 : 400,
               }}
             >
               {l.label}
             </Link>
           ))}
+
+          {/* SIGN IN */}
+          <Link
+            href="/auth"
+            style={{
+              color: "#8ab4ff",
+              padding: "8px 14px",
+              borderRadius: 8,
+              border: "1px solid #8ab4ff",
+              fontWeight: 600,
+            }}
+          >
+            Sign In
+          </Link>
+        </div>
+      </div>
+
+      {/* MOBILE MENU */}
+      {open && (
+        <div
+          className="mobile-menu"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            padding: "10px 16px",
+            background: "rgba(0,0,0,0.5)",
+            gap: 12,
+          }}
+        >
+          {links.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              style={{
+                padding: "10px 0",
+                borderBottom: "1px solid rgba(255,255,255,0.1)",
+                color: pathname === l.href ? "#8ab4ff" : "#fff",
+                fontWeight: pathname === l.href ? 700 : 400,
+              }}
+              onClick={() => setOpen(false)}
+            >
+              {l.label}
+            </Link>
+          ))}
+
+          <Link
+            href="/auth"
+            onClick={() => setOpen(false)}
+            style={{
+              padding: "10px 0",
+              color: "#8ab4ff",
+              fontWeight: 700,
+            }}
+          >
+            Sign In
+          </Link>
         </div>
       )}
 
-      {/* DESKTOP LINKS */}
-      <div
-        className="desktop-links"
-        style={{
-          display: "none",
-          maxWidth: 1200,
-          margin: "0 auto",
-          padding: "10px 16px",
-          justifyContent: "flex-end",
-          gap: 18
-        }}
-      >
-        {links.map((l) => (
-          <Link
-            key={l.href}
-            href={l.href}
-            style={{
-              position: "relative",
-              padding: "10px",
-              fontWeight: pathname === l.href ? 700 : 400,
-              opacity: pathname === l.href ? 1 : 0.7
-            }}
-          >
-            {l.label}
-          </Link>
-        ))}
-      </div>
-
+      {/* CSS FOR BREAKPOINT */}
       <style>{`
         @media (min-width: 768px) {
-          .mobile-menu-button { display: none; }
-          .mobile-nav { display: none !important; }
-          .desktop-links { display: flex !important; }
+          .mobile-toggle { display: none; }
+          .mobile-menu { display: none !important; }
+          .desktop-menu { display: flex !important; }
         }
       `}</style>
     </nav>
