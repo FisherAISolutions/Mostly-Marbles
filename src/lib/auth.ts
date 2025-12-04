@@ -1,12 +1,28 @@
-// Simple placeholder helpers to integrate with your auth of choice (Supabase, NextAuth, etc.)
-
 export type User = {
   id: string;
   email: string;
   role: "owner" | "admin" | "user";
 };
 
+const OWNER_EMAIL = process.env.OWNER_EMAIL;
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+
+// TEMPORARY AUTH SIMULATION
+// This will be replaced with Supabase Auth later
 export async function getCurrentUser(): Promise<User | null> {
-  // TODO: Replace with real auth lookup
-  return null;
+  const email = OWNER_EMAIL; // Pretend the logged-in user is OWNER for now
+
+  let role: User["role"] = "user";
+
+  if (email === OWNER_EMAIL) {
+    role = "owner";
+  } else if (email === ADMIN_EMAIL) {
+    role = "admin";
+  }
+
+  return {
+    id: "local-user",
+    email,
+    role
+  };
 }
