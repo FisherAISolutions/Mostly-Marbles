@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 
 export default function AuthPage() {
-  const supabase = createBrowserSupabaseClient();
+  const supabase = createBrowserClient();
   const router = useRouter();
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -14,22 +14,19 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function checkSession() {
+    async function check() {
       const {
         data: { session },
       } = await supabase.auth.getSession();
       if (session) router.push("/");
     }
-    checkSession();
+    check();
   }, [supabase, router]);
 
-  async function handleSignUp() {
+  async function handleSignup() {
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    const { data, error } = await supabase.auth.signUp({ email, password });
 
     if (error) {
       alert(error.message);
@@ -46,10 +43,10 @@ export default function AuthPage() {
     }
 
     setLoading(false);
-    alert("Account created! Check your email to verify.");
+    alert("Account created. Check your email to verify.");
   }
 
-  async function handleSignIn() {
+  async function handleSignin() {
     setLoading(true);
 
     const { error } = await supabase.auth.signInWithPassword({
@@ -73,29 +70,24 @@ export default function AuthPage() {
         maxWidth: 420,
         margin: "80px auto",
         padding: 24,
-        borderRadius: 16,
+        borderRadius: 12,
         background: "rgba(0,0,0,0.6)",
-        border: "1px solid rgba(255,255,255,0.2)",
         color: "#fff",
       }}
     >
-      <h1 style={{ marginBottom: 20 }}>
-        {mode === "signin" ? "Sign In" : "Create Account"}
-      </h1>
+      <h1>{mode === "signin" ? "Sign In" : "Create Account"}</h1>
 
       <label>Email</label>
       <input
-        type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         style={{
           width: "100%",
+          marginTop: 8,
+          marginBottom: 16,
           padding: 10,
           borderRadius: 8,
-          marginBottom: 16,
-          background: "rgba(255,255,255,0.1)",
-          border: "1px solid rgba(255,255,255,0.2)",
-          color: "#fff",
+          border: "1px solid rgba(255,255,255,0.3)",
         }}
       />
 
@@ -106,26 +98,24 @@ export default function AuthPage() {
         onChange={(e) => setPassword(e.target.value)}
         style={{
           width: "100%",
+          marginTop: 8,
+          marginBottom: 24,
           padding: 10,
           borderRadius: 8,
-          marginBottom: 24,
-          background: "rgba(255,255,255,0.1)",
-          border: "1px solid rgba(255,255,255,0.2)",
-          color: "#fff",
+          border: "1px solid rgba(255,255,255,0.3)",
         }}
       />
 
       <button
         disabled={loading}
-        onClick={mode === "signin" ? handleSignIn : handleSignUp}
+        onClick={mode === "signin" ? handleSignin : handleSignup}
         style={{
           width: "100%",
           padding: 12,
           borderRadius: 10,
-          background: "linear-gradient(135deg, #8ab4ff, #7bdcb5)",
+          background: "linear-gradient(135deg, #7bdcb5, #8ab4ff)",
           border: "none",
           fontWeight: "bold",
-          color: "#000",
           cursor: "pointer",
           marginBottom: 12,
         }}
@@ -134,18 +124,18 @@ export default function AuthPage() {
           ? "Loading..."
           : mode === "signin"
           ? "Sign In"
-          : "Sign Up"}
+          : "Create Account"}
       </button>
 
-      <p style={{ textAlign: "center", marginTop: 10 }}>
+      <p style={{ textAlign: "center" }}>
         {mode === "signin" ? (
           <>
-            Don’t have an account?{" "}
+            Need an account?{" "}
             <span
-              style={{ color: "#7bdcb5", cursor: "pointer" }}
+              style={{ color: "#8ab4ff", cursor: "pointer" }}
               onClick={() => setMode("signup")}
             >
-              Create one
+              Sign up
             </span>
           </>
         ) : (
