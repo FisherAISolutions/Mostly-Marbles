@@ -10,13 +10,13 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 // TEMPORARY AUTH SIMULATION
 // This will be replaced with Supabase Auth later
 export async function getCurrentUser(): Promise<User | null> {
-  const email = OWNER_EMAIL; // Pretend the logged-in user is OWNER for now
+  const email = OWNER_EMAIL ?? ""; // Always supply a string
 
   let role: User["role"] = "user";
 
-  if (email === OWNER_EMAIL) {
+  if (email && OWNER_EMAIL && email === OWNER_EMAIL) {
     role = "owner";
-  } else if (email === ADMIN_EMAIL) {
+  } else if (email && ADMIN_EMAIL && email === ADMIN_EMAIL) {
     role = "admin";
   }
 
