@@ -1,152 +1,112 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 
 export default function AuthPage() {
-  const supabase = createBrowserClient();
+  // Create Supabase client (requires 2 arguments!)
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   const router = useRouter();
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    async function check() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (session) router.push("/");
-    }
-    check();
-  }, [supabase, router]);
-
-  async function handleSignup() {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({ email, password });
-
-    if (error) {
-      alert(error.message);
-      setLoading(false);
-      return;
-    }
-
-    if (data.user) {
-      await supabase.from("user_roles").insert({
-        user_id: data.user.id,
-        email: data.user.email,
-        role: "user",
+    if (mode === "signin") {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
+
+      if (error) setError(error.message);
+      else router.push("/");
+    }
+
+    if (mode === "signup") {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) setError(error.message);
+      else alert("Check your email for a confirmation link!");
     }
 
     setLoading(false);
-    alert("Account created. Check your email to verify.");
-  }
-
-  async function handleSignin() {
-    setLoading(true);
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    setLoading(false);
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    router.push("/");
   }
 
   return (
-    <div
-      style={{
-        maxWidth: 420,
-        margin: "80px auto",
-        padding: 24,
-        borderRadius: 12,
-        background: "rgba(0,0,0,0.6)",
-        color: "#fff",
-      }}
-    >
+    <div style={{ maxWidth: 400, margin: "40px auto" }}>
       <h1>{mode === "signin" ? "Sign In" : "Create Account"}</h1>
 
-      <label>Email</label>
-      <input
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        style={{
-          width: "100%",
-          marginTop: 8,
-          marginBottom: 16,
-          padding: 10,
-          borderRadius: 8,
-          border: "1px solid rgba(255,255,255,0.3)",
-        }}
-      />
+      <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
+        <input
+          type="email"
+          placeholder="Email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={{ padding: 10, borderRadius: 8 }}
+        />
 
-      <label>Password</label>
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        style={{
-          width: "100%",
-          marginTop: 8,
-          marginBottom: 24,
-          padding: 10,
-          borderRadius: 8,
-          border: "1px solid rgba(255,255,255,0.3)",
-        }}
-      />
+        <input
+          type="password"
+          placeholder="Password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={{ padding: 10, borderRadius: 8 }}
+        />
 
-      <button
-        disabled={loading}
-        onClick={mode === "signin" ? handleSignin : handleSignup}
-        style={{
-          width: "100%",
-          padding: 12,
-          borderRadius: 10,
-          background: "linear-gradient(135deg, #7bdcb5, #8ab4ff)",
-          border: "none",
-          fontWeight: "bold",
-          cursor: "pointer",
-          marginBottom: 12,
-        }}
-      >
-        {loading
-          ? "Loading..."
-          : mode === "signin"
-          ? "Sign In"
-          : "Create Account"}
-      </button>
+        {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <p style={{ textAlign: "center" }}>
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            padding: "10px",
+            borderRadius: 8,
+            background: "#8ab4ff",
+            border: "none",
+            fontWeight: 600,
+          }}
+        >
+          {loading ? "Working..." : mode === "signin" ? "Sign In" : "Sign Up"}
+        </button>
+      </form>
+
+      <p style={{ marginTop: 20 }}>
         {mode === "signin" ? (
           <>
             Need an account?{" "}
-            <span
-              style={{ color: "#8ab4ff", cursor: "pointer" }}
+            <button
               onClick={() => setMode("signup")}
+              style={{ color: "#8ab4ff", background: "none", border: "none" }}
             >
               Sign up
-            </span>
+            </button>
           </>
         ) : (
           <>
             Already have an account?{" "}
-            <span
-              style={{ color: "#8ab4ff", cursor: "pointer" }}
+            <button
               onClick={() => setMode("signin")}
+              style={{ color: "#8ab4ff", background: "none", border: "none" }}
             >
               Sign in
-            </span>
+            </button>
           </>
         )}
       </p>

@@ -1,32 +1,49 @@
-"use server";
-
-import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
 
-export async function getCurrentUser() {
-  const supabase = createBrowserClient({ cookies });
+export type User = {
+  id: string;
+  email: string;
+  role: "owner" | "admin" | "user";
+};
 
-  // 1. Get session from Supabase Auth
+// SERVER-SIDE AUTH — used inside Server Components
+export async function getCurrentUser(): Promise<User | null> {
+  const cookieStore = cookies();
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set() {},
+        remove() {},
+      },
+    }
+  );
+
+  // 1️⃣ Get the Supabase session
   const {
-    data: { session }
+    data: { session },
   } = await supabase.auth.getSession();
 
-  if (!session) return null;
+  if (!session?.user) return null;
 
-  const user = session.user;
+  const authUser = session.user;
 
-  // 2. Load role from your `user_roles` table
-  const { data: roleRow } = await supabase
+  // 2️⃣ Pull the user role from your 'user_roles' table
+  const { data: userRole } = await supabase
     .from("user_roles")
     .select("role")
-    .eq("user_id", user.id)
-    .single();
-
-  const role = roleRow?.role ?? "user";
+    .eq("user_id", authUser.id)
+    .maybeSingle();
 
   return {
-    id: user.id,
-    email: user.email ?? "",
-    role
+    id: authUser.id,
+    email: authUser.email!,
+    role: (userRole?.role as User["role"]) ?? "user",
   };
 }

@@ -12,9 +12,5 @@ export default function SupabaseProvider({ children }: { children: React.ReactNo
     )
   );
 
-  return (
-    <SessionContextProvider supabaseClient={supabaseClient}>
-      {children}
-    </SessionContextProvider>
-  );
+  return <SessionContextProvider supabaseClient={supabaseClient}>{children}</SessionContextProvider>;
 }
