@@ -1,28 +1,32 @@
-export type User = {
-  id: string;
-  email: string;
-  role: "owner" | "admin" | "user";
-};
+"use server";
 
-const OWNER_EMAIL = process.env.OWNER_EMAIL;
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 
-// TEMP AUTH SIMULATION (will be replaced by real Supabase Auth later)
-export async function getCurrentUser(): Promise<User | null> {
-  // Always return a string, never undefined
-  const email: string = OWNER_EMAIL ?? "";
+export async function getCurrentUser() {
+  const supabase = createServerSupabaseClient({ cookies });
 
-  let role: User["role"] = "user";
+  // 1. Get session from Supabase Auth
+  const {
+    data: { session }
+  } = await supabase.auth.getSession();
 
-  if (email && OWNER_EMAIL && email === OWNER_EMAIL) {
-    role = "owner";
-  } else if (email && ADMIN_EMAIL && email === ADMIN_EMAIL) {
-    role = "admin";
-  }
+  if (!session) return null;
+
+  const user = session.user;
+
+  // 2. Load role from your `user_roles` table
+  const { data: roleRow } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", user.id)
+    .single();
+
+  const role = roleRow?.role ?? "user";
 
   return {
-    id: "local-user",
-    email: email,   // ← absolutely guaranteed string
-    role: role
+    id: user.id,
+    email: user.email ?? "",
+    role
   };
 }

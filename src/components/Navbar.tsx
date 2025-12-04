@@ -36,6 +36,7 @@ export default function Navbar() {
           padding: "0 16px"
         }}
       >
+        <Link href="/auth">Sign In</Link>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div
             style={{

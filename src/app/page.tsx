@@ -20,7 +20,7 @@ export default function Home() {
             all in one beautiful place.
           </h1>
           <p style={{ fontSize: 16, opacity: 0.85, maxWidth: 540 }}>
-            Mostly Marbles combines a curated marketplace with an evolving AI identifier trained by real collectors.
+            Marble Market combines a curated marketplace with an evolving AI identifier trained by real collectors.
             Upload a photo, get an opinion, explore rarities, and help teach the system as you go.
           </p>
 
