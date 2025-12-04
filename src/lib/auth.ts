@@ -1,10 +1,10 @@
 "use server";
 
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 
 export async function getCurrentUser() {
-  const supabase = createServerSupabaseClient({ cookies });
+  const supabase = createBrowserSupabaseClient({ cookies });
 
   // 1. Get session from Supabase Auth
   const {
